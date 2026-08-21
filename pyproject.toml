@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "endstone_arc_market_economy"
+version = "0.1.0"
+dependencies = []
+authors = [
+    { name = "DEVILENMO", email = "DEVILENMO@gmail.com" },
+]
+description = "ARC Market Economy - shared official prices and dynamic market pricing for ARC shop plugins."
+readme = "README.md"
+license = { file = "LICENSE" }
+keywords = ["endstone", "plugin", "economy", "market", "pricing"]
+
+[project.urls]
+Homepage = "https://github.com/DEVILENMO/EndstoneMC-ARC-Market-Economy-Plugin"
+
+[project.entry-points."endstone"]
+arc_market_economy = "endstone_arc_market_economy:ARCMarketEconomyPlugin"

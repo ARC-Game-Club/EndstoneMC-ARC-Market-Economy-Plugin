@@ -1,0 +1,6 @@
+# ARC Market Economy
+NO_PERMISSION=§cNo permission
+MARKET_USAGE=§cUsage: /market <prices|reload|reset>
+MARKET_PRICES_CONTENT=§f{0} items have official prices.\nDynamic pricing: {1}\nDaily fluctuation: {2}\n\n§eSubcommands:\n§f/market reload §7— reload price config\n§f/market reset §7— reset all dynamic adjustments
+MARKET_RELOAD_SUCCESS=§aOfficial prices reloaded ({0} items)
+MARKET_RESET_SUCCESS=§aAll dynamic price adjustments reset

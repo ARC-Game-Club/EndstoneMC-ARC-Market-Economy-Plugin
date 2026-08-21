@@ -1,0 +1,6 @@
+# 弧光市场经济
+NO_PERMISSION=§c没有权限
+MARKET_USAGE=§c用法: /market <prices|reload|reset>
+MARKET_PRICES_CONTENT=§f当前有 {0} 个物品配置了官方定价。\n动态定价: {1}\n每日波动: {2}\n\n§e子命令:\n§f/market reload §7— 重新加载定价配置\n§f/market reset §7— 重置所有动态调整
+MARKET_RELOAD_SUCCESS=§a官方定价配置已重新加载（{0} 个物品）
+MARKET_RESET_SUCCESS=§a所有动态价格调整已重置
