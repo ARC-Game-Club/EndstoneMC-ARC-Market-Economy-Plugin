@@ -17,7 +17,7 @@ class ARCMarketEconomyPlugin(Plugin):
     api_version = "0.10"
     load = "POSTWORLD"
 
-    PLACEHOLDER_SELL_PRICE = 99999
+    PLACEHOLDER_SELL_PRICE = 0
 
     commands = {
         "market": {
@@ -241,14 +241,32 @@ class ARCMarketEconomyPlugin(Plugin):
     def api_has_price(self, item_type: str) -> bool:
         return bool(self.price_manager and self.price_manager.has_official_price(item_type))
 
+    def api_ensure_item(
+        self,
+        item_type: str,
+        sell: int = 0,
+        buy: int = 0,
+        display_name: str = None,
+        category: str = "待配置",
+    ) -> dict:
+        """确保价目存在；缺失则自动写入（默认 sell/buy=0）。"""
+        if not self.price_manager or not item_type:
+            return {}
+        return self.price_manager.ensure_item_price(
+            item_type, sell=sell, buy=buy, display_name=display_name, category=category
+        )
+
     def api_get_base_price(self, item_type: str, side: str):
         if not self.price_manager:
             return None
+        # 询价时自动补全缺失物品
+        self.api_ensure_item(item_type, sell=0, buy=0)
         return self.price_manager.get_base_price(item_type, side)
 
     def api_get_final_price(self, item_type: str, side: str, discount_percent: float = 0.0):
         if not self.price_manager:
             return None
+        self.api_ensure_item(item_type, sell=0, buy=0)
         return self.price_manager.calculate_final_price(item_type, side, discount_percent)
 
     def api_is_buy_suspended(self, item_type: str, discount_percent: float = 0.0) -> bool:

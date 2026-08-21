@@ -12,7 +12,7 @@ MAIN_PATH = 'plugins/ARCMarketEconomy'
 class PriceManager:
     """官方定价管理器 - 管理统一价格配置、动态定价和每日波动"""
 
-    PLACEHOLDER_SELL_PRICE = 99999  # 快速设置时未配置物品的临时出售价
+    PLACEHOLDER_SELL_PRICE = 0  # 兼容旧常量；未配置物品改为自动写入价目（sell/buy=0）
 
     def __init__(self, plugin):
         self.plugin = plugin
@@ -33,6 +33,61 @@ class PriceManager:
             self.plugin._safe_log(level, message)
         else:
             print(f"[{level.upper()}] {message}")
+
+    def ensure_item_price(
+        self,
+        item_type: str,
+        sell: int = 0,
+        buy: int = 0,
+        display_name: str = None,
+        category: str = "待配置",
+    ) -> dict:
+        """若价目中无该物品，则以给定基准价写入内存并追加到 official_prices.yml。"""
+        if not item_type:
+            return {}
+        if item_type in self.official_prices:
+            return self.official_prices[item_type]
+
+        # get_item_display_name 在缺失时也能从 type 推导
+        name = display_name or self.get_item_display_name(item_type)
+        entry = {
+            "sell": int(sell),
+            "buy": int(buy),
+            "display_name": name,
+            "category": category or "待配置",
+        }
+        self.official_prices[item_type] = entry
+        if entry["category"] not in self.category_order:
+            self.category_order.append(entry["category"])
+        self._append_item_to_config(item_type, entry)
+        self._safe_log(
+            "info",
+            f"[ARCMarketEconomy] Auto-added missing price: {item_type} "
+            f"sell={sell} buy={buy} category={entry['category']}",
+        )
+        return entry
+
+    def _append_item_to_config(self, item_type: str, entry: dict) -> None:
+        """把新物品追加到 official_prices.yml（不重写整文件）。"""
+        try:
+            self.config_path.parent.mkdir(parents=True, exist_ok=True)
+            block = (
+                f"\n  # auto-added pending config\n"
+                f"  {item_type}:\n"
+                f"    display_name: {entry.get('display_name', item_type)}\n"
+                f"    category: {entry.get('category', '待配置')}\n"
+                f"    sell: {int(entry.get('sell', 0))}\n"
+                f"    buy: {int(entry.get('buy', 0))}\n"
+            )
+            if not self.config_path.exists():
+                self.config_path.write_text(
+                    "# 官方定价\nprices:\n" + block.lstrip("\n"), encoding="utf-8"
+                )
+                return
+            with open(self.config_path, "a", encoding="utf-8") as f:
+                f.write(block)
+        except Exception as e:
+            self._safe_log("error", f"[ARCMarketEconomy] Append price to yml failed: {e}")
 
     # ==================== 配置加载 ====================
 
@@ -775,16 +830,13 @@ prices:
         return item_type in self.official_prices
 
     def get_base_price(self, item_type: str, shop_type: str) -> Optional[int]:
-        """获取物品基准价格"""
+        """获取物品基准价格；缺失时自动以 0/0 写入价目。"""
         if item_type not in self.official_prices:
-            if shop_type == 'sell':
-                return self.PLACEHOLDER_SELL_PRICE
-            return None
-        prices = self.official_prices[item_type]
-        if shop_type == 'sell':
-            return prices.get('sell')
-        else:
-            return prices.get('buy')
+            self.ensure_item_price(item_type, sell=0, buy=0)
+        prices = self.official_prices.get(item_type) or {}
+        if shop_type == "sell":
+            return int(prices.get("sell", 0) or 0)
+        return int(prices.get("buy", 0) or 0)
 
     def get_all_priced_items(self) -> Dict:
         """获取所有有官方定价的物品"""
@@ -846,6 +898,15 @@ prices:
         if base_price is None:
             return None
 
+        # 基准为 0：待配置物品，成交价保持 0（不强制抬到 1）
+        if int(base_price) == 0:
+            if shop_type == "buy":
+                sell_price = self.calculate_final_price(item_type, "sell", discount_percent)
+                # sell/buy 同为 0 时暂停回收，避免 0 元循环套利语义不清
+                if sell_price is not None and sell_price <= 0:
+                    return None
+            return 0
+
         adjustments = self.get_price_adjustment(item_type)
 
         if shop_type == 'sell':
@@ -860,7 +921,7 @@ prices:
         multiplier = (1.0 + demand_adj + daily_adj) * (1.0 + discount_percent / 100.0)
         final_price = round(base_price * multiplier)
 
-        # 确保价格不低于1
+        # 确保价格不低于1（非零基准）
         final_price = max(1, final_price)
 
         # 防御：回收价不得高于或等于出售价 → 禁用回收（只卖不收）

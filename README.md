@@ -1,6 +1,6 @@
 # 弧光市场经济插件 (ARC Market Economy)
 
-[![版本](https://img.shields.io/badge/版本-1.0.0-blue.svg)](https://github.com/ARC-Minecraft/EndstoneMC-ARC-Market-Economy-Plugin)
+[![版本](https://img.shields.io/badge/版本-1.0.1-blue.svg)](https://github.com/ARC-Minecraft/EndstoneMC-ARC-Market-Economy-Plugin)
 [![EndStone](https://img.shields.io/badge/EndStone-0.10+-green.svg)](https://github.com/EndstoneMC/endstone)
 
 全服共享的官方价目与动态市场：供木牌商店等插件询价与反馈成交。
@@ -43,4 +43,11 @@ mkt.api_on_trade("minecraft:diamond", "sell", quantity=1, total_amount=10000, so
 
 ## 安装
 
-将 `endstone_arc_market_economy-1.0.0-*.whl` 放入服务器 `plugins` 目录后重启。
+将 `endstone_arc_market_economy-1.0.1-*.whl` 放入服务器 `plugins` 目录后重启。
+
+## 数据存储
+
+- **基准价目** `official_prices.yml`：给人看、好改；缺失物品询价时会**自动追加**（默认 sell/buy=0，分类「待配置」）
+- **动态态 / 流水** `market_economy.db`（SQLite）：`price_adjustments`、`item_trade_volume`
+
+价目继续用 yml 便于手改；自动增删与查询若要更强，可后续把价目也迁进 SQLite，yml 仅作导入导出。
