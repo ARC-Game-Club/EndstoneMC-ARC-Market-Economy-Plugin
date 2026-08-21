@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "endstone_arc_market_economy"
-version = "0.1.0"
+version = "1.0.0"
 dependencies = []
 authors = [
     { name = "DEVILENMO", email = "DEVILENMO@gmail.com" },
@@ -15,7 +15,7 @@ license = { file = "LICENSE" }
 keywords = ["endstone", "plugin", "economy", "market", "pricing"]
 
 [project.urls]
-Homepage = "https://github.com/DEVILENMO/EndstoneMC-ARC-Market-Economy-Plugin"
+Homepage = "https://github.com/ARC-Minecraft/EndstoneMC-ARC-Market-Economy-Plugin"
 
 [project.entry-points."endstone"]
 arc_market_economy = "endstone_arc_market_economy:ARCMarketEconomyPlugin"
