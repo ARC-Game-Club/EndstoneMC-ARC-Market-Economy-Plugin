@@ -1039,39 +1039,39 @@ prices:
             self._safe_log('error', f"[ARCMarketEconomy] Update demand pricing error: {e}")
 
     def _save_price_adjustment(self, item_type: str, db_manager):
-        """保存价格调整到数据库"""
+        """保存价格调整到数据库（按 item_type 主键 upsert，无 id 列）。"""
         try:
             adj = self.price_adjustments.get(item_type)
             if not adj:
                 return
 
             existing = db_manager.query_one(
-                "SELECT id FROM price_adjustments WHERE item_type = ?",
-                (item_type,)
+                "SELECT item_type FROM price_adjustments WHERE item_type = ?",
+                (item_type,),
             )
 
             data = {
-                'demand_sell_adjust': adj['demand_sell_adjust'],
-                'demand_buy_adjust': adj['demand_buy_adjust'],
-                'daily_adjust_percent': adj['daily_adjust_percent'],
-                'sell_amount_accumulated': adj.get('sell_amount_accumulated', 0.0),
-                'buy_amount_accumulated': adj.get('buy_amount_accumulated', 0.0),
-                'sell_link_adjust': adj.get('sell_link_adjust', 0.0),
-                'last_updated': adj['last_updated']
+                "demand_sell_adjust": adj["demand_sell_adjust"],
+                "demand_buy_adjust": adj["demand_buy_adjust"],
+                "daily_adjust_percent": adj["daily_adjust_percent"],
+                "sell_amount_accumulated": adj.get("sell_amount_accumulated", 0.0),
+                "buy_amount_accumulated": adj.get("buy_amount_accumulated", 0.0),
+                "sell_link_adjust": adj.get("sell_link_adjust", 0.0),
+                "last_updated": adj["last_updated"],
             }
 
             if existing:
                 db_manager.update(
-                    table='price_adjustments',
+                    table="price_adjustments",
                     data=data,
-                    where='item_type = ?',
-                    params=(item_type,)
+                    where="item_type = ?",
+                    params=(item_type,),
                 )
             else:
-                data['item_type'] = item_type
-                db_manager.insert('price_adjustments', data)
+                data["item_type"] = item_type
+                db_manager.insert("price_adjustments", data)
         except Exception as e:
-            self._safe_log('error', f"[ARCMarketEconomy] Save price adjustment error: {e}")
+            self._safe_log("error", f"[ARCMarketEconomy] Save price adjustment error: {e}")
 
     def load_price_adjustments_from_db(self, db_manager):
         """从数据库加载价格调整状态"""
