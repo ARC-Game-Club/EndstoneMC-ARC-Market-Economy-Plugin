@@ -1,6 +1,6 @@
 # 弧光市场经济插件 (ARC Market Economy)
 
-[![版本](https://img.shields.io/badge/版本-1.0.2-blue.svg)](https://github.com/ARC-Minecraft/EndstoneMC-ARC-Market-Economy-Plugin)
+[![版本](https://img.shields.io/badge/版本-1.0.2-blue.svg)](https://github.com/ARC-Game-Club/EndstoneMC-ARC-Market-Economy-Plugin)
 [![EndStone](https://img.shields.io/badge/EndStone-0.10+-green.svg)](https://github.com/EndstoneMC/endstone)
 
 全服共享的官方价目与动态市场：供木牌商店等插件询价与反馈成交。
